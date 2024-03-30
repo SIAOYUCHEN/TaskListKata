@@ -9,7 +9,7 @@ namespace Tasks.Application.UserInterface
         
         Task FindById(long taskId);
         
-        IEnumerable<Project> GetAllProjects();
+        IDictionary<string, IList<Task>> GetAllProjects();
         
         void AddProject(string projectName);
     }

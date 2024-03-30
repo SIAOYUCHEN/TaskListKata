@@ -23,7 +23,17 @@ namespace Tasks.Application.Service
                 throw new ArgumentException("Task ID is required.");
             }
 
-            var id = int.Parse(arguments[0]);
+            int id;
+            try
+            {
+                id = int.Parse(arguments[1]);
+            }
+            catch (FormatException)
+            {
+                _console.WriteLine("The task ID must be a number.");
+                return;
+            }
+            
             var task = _taskRepository.FindById(id);
             if (task == null)
             {

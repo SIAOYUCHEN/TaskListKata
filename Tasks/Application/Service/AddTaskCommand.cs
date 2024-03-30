@@ -23,10 +23,11 @@ namespace Tasks.Application.Service
                 throw new ArgumentException("Project name and task description are required.");
             }
             
-            var projectName = arguments[0];
-            var taskDescription = string.Join(" ", arguments.Skip(1));
-            var task = new Task { Description = taskDescription, Done = false };
-            _taskRepository.AddTask(projectName, task);
+            var projectName = arguments[1].Split(' ');
+            
+            var task = new Task { Description = projectName[2], Done = false };
+            
+            _taskRepository.AddTask(projectName[1], task);
         }
     }
 }

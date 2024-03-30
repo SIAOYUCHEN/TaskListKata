@@ -15,9 +15,9 @@ namespace Tasks.Application.Service
 
         public void Execute(string[] arguments)
         {
-            var projectName = string.Join(" ", arguments);
-            //var project = new Project { Name = projectName };
-            _taskRepository.AddProject(projectName);
+            var projectName = arguments[1].Split(' ');
+            
+            _taskRepository.AddProject(projectName[1]);
         }
     }
 }

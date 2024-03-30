@@ -7,37 +7,37 @@ namespace Tasks.Infrastructure
 {
     public class TaskRepository : ITaskRepository
     {
-        private readonly IDictionary<string, Project> _projects = new Dictionary<string, Project>();
+        private readonly IDictionary<string, IList<Task>> _tasks = new Dictionary<string, IList<Task>>();
         private long _lastId = 0;
 
         public void AddTask(string projectName, Task task)
         {
-            if (!_projects.TryGetValue(projectName, out var project))
+            if (!_tasks.TryGetValue(projectName, out var projectTasks))
             {
-                project = new Project { Name = projectName };
-                _projects[projectName] = project;
+                projectTasks = new List<Task>();
+                _tasks[projectName] = projectTasks;
             }
             task.Id = ++_lastId;
-            project.Tasks.Add(task);
+            projectTasks.Add(task);
         }
 
         public Task FindById(long taskId)
         {
-            return _projects
-                .SelectMany(p => p.Value.Tasks)
+            return _tasks
+                .SelectMany(kv => kv.Value)
                 .FirstOrDefault(t => t.Id == taskId);
         }
-
-        public IEnumerable<Project> GetAllProjects()
+        
+        public IDictionary<string, IList<Task>> GetAllProjects()
         {
-            return _projects.Values;
+            return _tasks;
         }
 
         public void AddProject(string projectName)
         {
-            if (!_projects.ContainsKey(projectName))
+            if (!_tasks.ContainsKey(projectName))
             {
-                _projects[projectName] = new Project { Name = projectName };
+                _tasks[projectName] = new List<Task>();
             }
         }
     }

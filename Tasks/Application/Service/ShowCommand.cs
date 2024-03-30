@@ -20,8 +20,8 @@ namespace Tasks.Application.Service
             var projects = _taskRepository.GetAllProjects();
             foreach (var project in projects)
             {
-                _console.WriteLine($"Project: {project.Name}");
-                foreach (var task in project.Tasks)
+                _console.WriteLine(project.Key);
+                foreach (var task in project.Value)
                 {
                     _console.WriteLine($"    [{(task.Done ? 'x' : ' ')}] {task.Id}: {task.Description}");
                 }
