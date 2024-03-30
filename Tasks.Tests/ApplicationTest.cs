@@ -60,29 +60,39 @@ namespace Tasks
 		}
 
 		[Test]
-		[TestCase(new string[] { "add project project1", "add task project1 test", "show", "quit" }, new string[] { "project1" })]
-		public void Should_Display_Projects_After_AddProject_And_AddTask_And_Show_Commands(string[] commands, string[] expectedProjects)
+		[TestCase(new string[] { "add project project1", "add task project1 test", "show", "quit" }, 
+			new string[] { "project1" }, 
+			new string[] { "test" })]
+		[TestCase(new string[] { "add project project1", "add task project1 test", "add task project1 test2", "show", "quit" }, 
+			new string[] { "project1" }, 
+			new string[] { "test", "test2" })]
+		public void Should_Display_Projects_After_AddProject_And_AddTask_And_Show_Commands(
+			string[] commands, 
+			string[] expectedProjects,
+			string[] taskDescriptions)
 		{
-			var tasksForProject = new List<Task> { new Task { Id = 1, Description = "test", Done = false } };
+			var tasksForProject = taskDescriptions.Select((desc, index) => new Task { Id = index + 1, Description = desc, Done = false }).ToList();
 
 			var projectsDictionary = expectedProjects.ToDictionary(
 				projectName => projectName, 
 				projectName => tasksForProject as IList<Task>
 			);
-			
+    
 			_taskRepository.GetAllProjects().Returns(projectsDictionary);
-			
+    
 			_console.ReadLine().Returns(commands[0], commands.Skip(1).ToArray());
-			
+    
 			_taskList.Run();
-			
+    
 			_console.Received(commands.Length).Write("> ");
-			
+    
 			foreach (var projectName in expectedProjects)
 			{
 				_console.Received(1).WriteLine(projectName);
-
-				_console.Received(1).WriteLine($"    [ ] 1: test");
+				foreach (var task in tasksForProject)
+				{
+					_console.Received(1).WriteLine($"    [ ] {task.Id}: {task.Description}");
+				}
 			}
 		}
 	}
