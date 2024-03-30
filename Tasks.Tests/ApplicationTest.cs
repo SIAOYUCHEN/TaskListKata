@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using NSubstitute;
 using NUnit.Framework;
 using Tasks.Application.UserInterface;
@@ -35,20 +36,27 @@ namespace Tasks
 		}
 
 		[Test]
-		public void Should_Display_Project_After_AddProject_And_Show_Commands()
+		[TestCase(new string[] { "add project project1", "show", "quit" }, new string[] { "project1" })]
+		[TestCase(new string[] { "add project project2", "add project project3", "show", "quit" }, new string[] { "project2", "project3" })]
+		public void Should_Display_Projects_After_AddProject_And_Show_Commands(string[] commands, string[] expectedProjects)
 		{
-			_taskRepository.GetAllProjects().Returns(new Dictionary<string, IList<Task>>
-			{
-				{ "project1", new List<Task>() }
-			});
+			var projectsDictionary = expectedProjects.ToDictionary(
+				projectName => projectName, 
+				projectName => new List<Task>() as IList<Task>
+			);
 			
-			_console.ReadLine().Returns("add project project1", "show", "quit");
+			_taskRepository.GetAllProjects().Returns(projectsDictionary);
+			
+			_console.ReadLine().Returns(commands[0], commands.Skip(1).ToArray());
 			
 			_taskList.Run();
-
-			_console.Received(3).Write("> ");
 			
-			_console.Received().WriteLine("project1");
+			_console.Received(commands.Length).Write("> ");
+			
+			foreach (var projectName in expectedProjects)
+			{
+				_console.Received(1).WriteLine(projectName);
+			}
 		}
 	}
 }
