@@ -95,5 +95,47 @@ namespace Tasks
 				}
 			}
 		}
+		
+		[Test]
+		[TestCase(new string[] { "add project project1", "add task project1 test", "check 1", "show", "quit" },
+			new string[] { "project1" },
+			new string[] { "test" },
+			new int[] { 1 })]
+		[TestCase(new string[] { "add project project1", "add task project1 test", "add task project1 test2", "check 1", "check 2", "show", "quit" },
+			new string[] { "project1" },
+			new string[] { "test", "test2" },
+			new int[] { 1, 2 })]
+		public void Should_Display_Projects_After_AddProject_And_AddTask_And_CheckCommand_And_Show_Commands(
+			string[] commands, 
+			string[] expectedProjects,
+			string[] taskDescriptions,
+			int[] checkedTasks)
+		{
+			var tasksForProject = taskDescriptions.Select((desc, index) => 
+				new Task { Id = index + 1, Description = desc, Done = checkedTasks.Contains(index + 1) }).ToList();
+
+			var projectsDictionary = expectedProjects.ToDictionary(
+				projectName => projectName, 
+				projectName => tasksForProject as IList<Task>
+			);
+
+			_taskRepository.GetAllProjects().Returns(projectsDictionary);
+			
+			_console.ReadLine().Returns(commands[0], commands.Skip(1).ToArray());
+
+			_taskList.Run();
+			
+			_console.Received(commands.Length).Write("> ");
+			
+			foreach (var projectName in expectedProjects)
+			{
+				_console.Received(1).WriteLine(projectName);
+				foreach (var task in tasksForProject)
+				{
+					var doneMarker = task.Done ? "x" : " ";
+					_console.Received(1).WriteLine($"    [{doneMarker}] {task.Id}: {task.Description}");
+				}
+			}
+		}
 	}
 }
