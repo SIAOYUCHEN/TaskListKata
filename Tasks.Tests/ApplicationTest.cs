@@ -34,6 +34,21 @@ namespace Tasks
 			_console.Received(1).Write("> ");
 		}
 
-		
+		[Test]
+		public void Should_Display_Project_After_AddProject_And_Show_Commands()
+		{
+			_taskRepository.GetAllProjects().Returns(new Dictionary<string, IList<Task>>
+			{
+				{ "project1", new List<Task>() }
+			});
+			
+			_console.ReadLine().Returns("add project project1", "show", "quit");
+			
+			_taskList.Run();
+
+			_console.Received(3).Write("> ");
+			
+			_console.Received().WriteLine("project1");
+		}
 	}
 }
